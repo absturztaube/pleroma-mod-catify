@@ -177,6 +177,7 @@ PleromaModCatify.prototype.run = function () {
 
 PleromaModCatify.prototype.addCat = function(handle, myself) {
     var self = this;
+    handle = handle.trim();
     if(!self.cats.hasOwnProperty(handle) || myself) {
         self.cats[handle] = new PleromaCat(handle, myself);
     }
