@@ -7,6 +7,10 @@ Sadly, we don't have a cat flag in our profiles in pleroma, so this script uses 
 
 Put the js and css file into your static directory (i have it in `priv/static/instance/pleroma-mods/`. If you're using another path, please ensure that the css is referenced in the config correctly)
 
+### direct include
+
+use master branch for this
+
 Add the following to your `priv/static/index.html` right before the closing `<body>`-Tag
 
 ```
@@ -14,6 +18,10 @@ Add the following to your `priv/static/index.html` right before the closing `<bo
 ```
 
 Be aware, that this might break on updating pleroma.
+
+### using the pleroma-mod-loader
+
+add `"catify"` to the mods array in the pleroma-mod-loader
 
 ## Configuration
 
