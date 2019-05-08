@@ -293,9 +293,9 @@ PleromaModCatify.prototype.catify = function() {
     }
 };
 
-if(!window.mods) {
-    window.mods = {}
-}
 
-window.mods.catify = new PleromaModCatify();
-window.mods.catify.run();
+export default function() {
+    var catify = new PleromaModCatify();
+    catify.run();
+    return catify;
+}
