@@ -34,6 +34,10 @@
         right: 0;
 }
 
+.cat .avatar:hover::before {
+    animation: earwiggleright 1s infinite;
+}
+
 .cat .avatar::after {
         border-radius: 0 75% 75%;
         transform: rotate(37.6deg) skew(30deg);
@@ -41,4 +45,24 @@
         bottom: 0;
         left: 0;
         right: 0;
+}
+
+.cat .avatar:hover::after {
+    animation: earwiggleleft 1s infinite;
+}
+
+@keyframes earwiggleleft {
+    from { transform: rotate(37.6deg) skew(30deg); }
+    25% { transform: rotate(10deg) skew(30deg); }
+    50% { transform: rotate(20deg) skew(30deg); }
+    75% { transform: rotate(0deg) skew(30deg); }
+    to { transform: rotate(37.6deg) skew(30deg); }
+}
+
+@keyframes earwiggleright {
+    from { transform: rotate(-37.6deg) skew(-30deg); }
+    30% { transform: rotate(-10deg) skew(-30deg); }
+    55% { transform: rotate(-20deg) skew(-30deg); }
+    75% { transform: rotate(-0deg) skew(-30deg); }
+    to { transform: rotate(-37.6deg) skew(-30deg); }
 }
