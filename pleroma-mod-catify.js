@@ -61,9 +61,8 @@ ColorDetector.prototype.detect = function() {
     return self.color;
 }
 
-function PleromaCat(handle, myself) {
+function PleromaCat(handle) {
     this.handle = handle;
-    this.myself = myself;
     this.colors = {
         backgroundColor: '#000000',
         borderColor: '#000000'
@@ -81,7 +80,8 @@ PleromaCat.prototype.makeCat = function() {
         self.getClassName()
     );
 
-    self.makeUserInfoCat();
+    self.makeCatByClassName('user-info');
+    self.makeCatByClassName('basic-user-card');
 
     for(var postIndex in posts) {
         var currentPost = posts[postIndex];
@@ -89,16 +89,26 @@ PleromaCat.prototype.makeCat = function() {
     }
 };
 
-PleromaCat.prototype.makeUserInfoCat = function() {
+PleromaCat.prototype.makeCatByClassName = function(className) {
     var self = this;
-    var userinfos = document.getElementsByClassName('user-info');
+    if(!className) {
+        className = 'user-info';
+    }
+    var userinfos = document.getElementsByClassName(className);
     for(var infoIndex in userinfos) {
         if(userinfos[infoIndex].getElementsByClassName && !/cat$/.test(userinfos[infoIndex].innerText)) {
             var handle = userinfos[infoIndex].getElementsByClassName('handle');
+            var regexHandle = new RegExp(self.handle, 'i');
             if(handle.length > 0) {
-                var regexHandle = new RegExp(self.handle, 'i');
                 if(regexHandle.test(handle[0].innerText)) {
                     self.makeCatByElement(userinfos[infoIndex]);
+                }
+            } else {
+                handle = userinfos[infoIndex].getElementsByClassName('basic-user-card-screen-name');
+                if(handle.length > 0) {
+                    if(regexHandle.test(handle[0].innerText)) {
+                        self.makeCatByElement(userinfos[infoIndex]);
+                    }
                 }
             }
         }
@@ -160,9 +170,23 @@ function PleromaModCatify() {
             ],
             'instances': [
                 'misskey.io',
+                'waifu@pikachu.rocks',
                 'Ocean22@niu.moe',
                 'Ocean@pleroma.soykaf.com'
             ]
+        },
+        'observer': {
+            'classes': [
+                'timeline',
+                'panel-body',
+                'main',
+                'active',
+                'status-body'
+            ],
+            'config': {
+                subtree: true,
+                childList: true
+            }
         },
         'interval': 1000
     };
@@ -175,22 +199,47 @@ function PleromaModCatify() {
 
 PleromaModCatify.prototype.run = function () {
     var self = this;
-    
-    window.setTimeout(function() {
-        self.areYouACat();
-    }, self.config.interval * 2);
 
-    window.setInterval(function() {
+    window.setTimeout(function() {
+
+        self.areYouACat();
         self.detectCats();
         self.catify();
-    }, self.config.interval);
+
+        if(MutationObserver) {
+            var mainContainer = document.getElementsByClassName('main')[0];
+            var notificationContainer = document.getElementsByClassName('notifications')[0];
+            var observer = new MutationObserver(function(mutations, observer) {
+                var regex = new RegExp(self.config.observer.classes.join('|'));
+                for(var mutation of mutations) {
+                    if(
+                        regex.test(mutation.target.className)
+                    ) {
+                        self.detectCats();
+                        self.catify();
+                    }
+                }
+            });
+
+            observer.observe(mainContainer, self.config.observer.config);
+            observer.observe(notificationContainer, self.config.observer.config);
+        }
+
+    }, self.config.interval * 5);
+
+    if(!MutationObserver) {
+        window.setInterval(function() {
+            self.detectCats();
+            self.catify();
+        }, self.config.interval);
+    }
 };
 
-PleromaModCatify.prototype.addCat = function(handle, myself) {
+PleromaModCatify.prototype.addCat = function(handle) {
     var self = this;
     handle = handle.trim();
-    if(!self.cats.hasOwnProperty(handle) || myself) {
-        self.cats[handle] = new PleromaCat(handle, myself);
+    if(!self.cats.hasOwnProperty(handle)) {
+        self.cats[handle] = new PleromaCat(handle);
     }
 };
 
