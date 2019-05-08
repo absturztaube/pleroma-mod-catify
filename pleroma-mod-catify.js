@@ -81,18 +81,29 @@ PleromaCat.prototype.makeCat = function() {
         self.getClassName()
     );
 
-    if(self.myself) {
-        var userinfo = document.getElementsByClassName('user-info');
-        if(userinfo.length > 0) {
-            self.makeCatByElement(userinfo[0]);
-        }
-    }
+    self.makeUserInfoCat();
 
     for(var postIndex in posts) {
         var currentPost = posts[postIndex];
         self.makeCatByElement(currentPost);
     }
 };
+
+PleromaCat.prototype.makeUserInfoCat = function() {
+    var self = this;
+    var userinfos = document.getElementsByClassName('user-info');
+    for(var infoIndex in userinfos) {
+        if(userinfos[infoIndex].getElementsByClassName && !/cat$/.test(userinfos[infoIndex].innerText)) {
+            var handle = userinfos[infoIndex].getElementsByClassName('handle');
+            if(handle.length > 0) {
+                var regexHandle = new RegExp(self.handle, 'i');
+                if(regexHandle.test(handle[0].innerText)) {
+                    self.makeCatByElement(userinfos[infoIndex]);
+                }
+            }
+        }
+    }
+}
 
 PleromaCat.prototype.makeCatByElement = function(element) {
     var self = this;
