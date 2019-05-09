@@ -67,6 +67,16 @@ function PleromaCat(handle) {
         backgroundColor: '#000000',
         borderColor: '#000000'
     };
+    this.config = {
+        'nya': {
+            enabled: true,
+            matcher: /(^|\s|>)な+(\s|<|$)/g,
+            replacer: {
+                source: /な/g,
+                dest: 'にゃ'
+            },
+        }
+    }
 }
 
 PleromaCat.prototype.getClassName = function() {
@@ -83,9 +93,9 @@ PleromaCat.prototype.makeCat = function() {
     self.makeCatByClassName('user-info');
     self.makeCatByClassName('basic-user-card');
 
-    for(var postIndex in posts) {
-        var currentPost = posts[postIndex];
+    for(var currentPost of posts) {
         self.makeCatByElement(currentPost);
+        self.nyaByPost(currentPost);
     }
 };
 
@@ -130,6 +140,24 @@ PleromaCat.prototype.makeCatByElement = function(element) {
                 }
                 currentAvatar.style.backgroundColor = self.colors.backgroundColor;
                 currentAvatar.style.borderColor = self.colors.borderColor;
+            }
+        }
+    }
+};
+
+PleromaCat.prototype.nyaByPost = function(element) {
+    var self = this;
+    if(element.getElementsByClassName && self.config.nya.enabled) {
+        var contents = element.getElementsByClassName('status-content');
+        for(var content of contents) {
+            var matches = [...content.innerHTML.matchAll(self.config.nya.matcher)];
+            for(var match of matches) {
+                var source = match[0];
+                var dest = source.replace(
+                    self.config.nya.replacer.source, 
+                    self.config.nya.replacer.dest
+                );
+                content.innerHTML = content.innerHTML.replace(source, dest);
             }
         }
     }
