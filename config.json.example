@@ -1,0 +1,34 @@
+{
+    "nya": {
+        "enabled": true,
+        "matcher": "(^|\s|>)な+(\s|<|$)",
+        "replacer": {
+            "source": "な",
+            "dest": "にゃ"
+        }
+    },
+    "triggers": {
+        "displayName": [
+            "🐱",
+            "😺",
+            "🐈",
+            "😼",
+            "😹",
+            "にゃ",
+            "cat",
+            "mew",
+            "meow",
+            "nya",
+            "miaou",
+            "miau",
+            "kitten",
+            "kitn",
+            "ktn",
+            "kadse",
+            "catte"
+        ],
+        "instances": [
+            "misskey.io"
+        ]
+    }
+}
