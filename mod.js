@@ -150,14 +150,17 @@ PleromaCat.prototype.nyaByPost = function(element) {
     if(element.getElementsByClassName && self.config.nya.enabled) {
         var contents = element.getElementsByClassName('status-content');
         for(var content of contents) {
-            var matches = [...content.innerHTML.matchAll(self.config.nya.matcher)];
-            for(var match of matches) {
-                var source = match[0];
-                var dest = source.replace(
-                    self.config.nya.replacer.source, 
-                    self.config.nya.replacer.dest
-                );
-                content.innerHTML = content.innerHTML.replace(source, dest);
+            if(content.innerHTML) {
+                var regex = new RegExp(self.config.nya.matcher);
+                var match;
+                while((match = regex.exec(content.innerHTML))!==null) {
+                    var source = match[0];
+                    var dest = source.replace(
+                        self.config.nya.replacer.source, 
+                        self.config.nya.replacer.dest
+                    );
+                    content.innerHTML = content.innerHTML.replace(source, dest);
+                }
             }
         }
     }
@@ -178,7 +181,7 @@ PleromaCat.prototype.detectColors = function(avatarElement) {
 function PleromaModCatify() {
     this.cats = {};
     this.config = {
-        'stylesheet': '/instance/pleroma-mods/pleroma-mod-catify.css',
+        'stylesheet': 'style.css',
         'triggers': {
             'displayName': [
                 '🐱',
@@ -194,7 +197,9 @@ function PleromaModCatify() {
                 'miaou',
                 'kitten',
                 'kitn',
-                'ktn'
+                'ktn',
+                'kadse',
+                'catte'
             ],
             'instances': [
                 'misskey.io',
@@ -203,64 +208,36 @@ function PleromaModCatify() {
                 'Ocean@pleroma.soykaf.com'
             ]
         },
-        'observer': {
-            'classes': [
-                'timeline',
-                'panel-body',
-                'main',
-                'active',
-                'status-body'
-            ],
-            'config': {
-                subtree: true,
-                childList: true
-            }
-        },
-        'interval': 1000
+        'filter': [
+            'timeline',
+            'panel-body',
+            'main',
+            'active',
+            'status-body'
+        ],
     };
-
-    var stylesheet = document.createElement('link');
-    stylesheet.setAttribute('rel', 'stylesheet');
-    stylesheet.setAttribute('href', this.config.stylesheet);
-    document.getElementsByTagName('head')[0].appendChild(stylesheet);
 }
+
+PleromaModCatify.prototype.onMutation = function(mutation, observer) {
+    var self = this;
+    self.detectCats();
+    self.catify();
+};
+
+PleromaModCatify.prototype.onReady = function () {
+    var self = this;
+    self.areYouACat();
+    self.detectCats();
+    self.catify();
+};
 
 PleromaModCatify.prototype.run = function () {
     var self = this;
 
-    window.setTimeout(function() {
-
-        self.areYouACat();
-        self.detectCats();
-        self.catify();
-
-        if(MutationObserver) {
-            var mainContainer = document.getElementsByClassName('main')[0];
-            var notificationContainer = document.getElementsByClassName('notifications')[0];
-            var observer = new MutationObserver(function(mutations, observer) {
-                var regex = new RegExp(self.config.observer.classes.join('|'));
-                for(var mutation of mutations) {
-                    if(
-                        regex.test(mutation.target.className)
-                    ) {
-                        self.detectCats();
-                        self.catify();
-                    }
-                }
-            });
-
-            observer.observe(mainContainer, self.config.observer.config);
-            observer.observe(notificationContainer, self.config.observer.config);
-        }
-
-    }, self.config.interval * 5);
-
-    if(!MutationObserver) {
-        window.setInterval(function() {
-            self.detectCats();
-            self.catify();
-        }, self.config.interval);
-    }
+    var stylesheet = document.createElement('link');
+    stylesheet.setAttribute('rel', 'stylesheet');
+    stylesheet.setAttribute('href', window.__pleromaModLoader.config.modDirectory + 'pleroma-mod-catify/' + this.config.stylesheet);
+    document.getElementsByTagName('head')[0].appendChild(stylesheet);
 };
 
 PleromaModCatify.prototype.addCat = function(handle) {
@@ -322,8 +299,4 @@ PleromaModCatify.prototype.catify = function() {
 };
 
 
-export default function() {
-    var catify = new PleromaModCatify();
-    catify.run();
-    return catify;
-}
+window.__pleromaModLoader.registerClass('PleromaModCatify', PleromaModCatify);
