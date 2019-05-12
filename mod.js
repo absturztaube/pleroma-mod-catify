@@ -70,14 +70,34 @@ function PleromaCat(handle) {
     this.config = {
         'nya': {
             enabled: true,
-            matcher: /(^|\s|>)な+(\s|<|$)/g,
+            matcher: "(^|\s|>)な+(\s|<|$)",
             replacer: {
-                source: /な/g,
+                source: "な",
                 dest: 'にゃ'
             },
         }
-    }
+    };
+
+    this.loadConfig();
 }
+
+PleromaCat.prototype.loadConfig = function () {
+    var self = this;
+    var configUrl = window.__pleromaModLoader.config.modDirectory
+        + "pleroma-mod-catify/config.json";
+    window.__pleromaModLoader.loadJSON("GET", configUrl, function (response) {
+        if (!response.json.nya) {
+            return;
+        }
+        self.config.nya.enabled = response.json.nya.enabled; 
+        self.config.nya.matcher = response.json.nya.matcher 
+            || self.config.nya.matcher;
+        self.config.nya.replacer.source = response.json.nya.replacer.source 
+            || self.config.nya.replacer.source;
+        self.config.nya.replacer.dest = response.json.nya.replacer.dest
+            || self.config.nya.replacer.dest;
+    }, false);
+};
 
 PleromaCat.prototype.getClassName = function() {
     var self = this;
@@ -151,12 +171,12 @@ PleromaCat.prototype.nyaByPost = function(element) {
         var contents = element.getElementsByClassName('status-content');
         for(var content of contents) {
             if(content.innerHTML) {
-                var regex = new RegExp(self.config.nya.matcher);
+                var regex = new RegExp(self.config.nya.matcher, "g");
                 var match;
                 while((match = regex.exec(content.innerHTML))!==null) {
                     var source = match[0];
                     var dest = source.replace(
-                        self.config.nya.replacer.source, 
+                        new RegExp(self.config.nya.replacer.source, "g"), 
                         self.config.nya.replacer.dest
                     );
                     content.innerHTML = content.innerHTML.replace(source, dest);
@@ -202,10 +222,7 @@ function PleromaModCatify() {
                 'catte'
             ],
             'instances': [
-                'misskey.io',
-                'waifu@pikachu.rocks',
-                'Ocean22@niu.moe',
-                'Ocean@pleroma.soykaf.com'
+                'misskey.io'
             ]
         },
         'filter': [
@@ -216,7 +233,19 @@ function PleromaModCatify() {
             'status-body'
         ],
     };
+
+    this.loadConfig();
 }
+
+PleromaModCatify.prototype.loadConfig = function() {
+    var self = this;
+    var configUrl = window.__pleromaModLoader.config.modDirectory
+        + "pleroma-mod-catify/config.json";
+    window.__pleromaModLoader.loadJSON("GET", configUrl, function (response) { 
+        self.config.triggers.displayName = response.json.triggers.displayName;
+        self.config.triggers.instances = response.json.triggers.instances;
+    }, false);
+};
 
 PleromaModCatify.prototype.onMutation = function(mutation, observer) {
     var self = this;
